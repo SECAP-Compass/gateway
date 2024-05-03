@@ -9,7 +9,8 @@ import (
 type FiberServer struct {
 	*fiber.App
 
-	authClient *clients.AuthClient
+	authClient  clients.AuthClient
+	inputClient clients.InputClient
 }
 
 func New() *FiberServer {

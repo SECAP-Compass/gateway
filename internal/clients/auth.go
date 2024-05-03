@@ -8,22 +8,28 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type AuthClient struct {
+type AuthClient interface {
+	Login(ctx *fiber.Ctx) error
+	Register(ctx *fiber.Ctx) error
+	Roles(ctx *fiber.Ctx) ([]string, error)
+}
+
+type authClient struct {
 	baseUrl string
 }
 
-func NewAuthClient() *AuthClient {
+func NewAuthClient() AuthClient {
 	baseUrl := os.Getenv("AUTH_BASEURL")
 	if baseUrl == "" {
 		panic("AUTH_BASEURL is not set")
 	}
 
-	return &AuthClient{
+	return &authClient{
 		baseUrl: baseUrl,
 	}
 }
 
-func (c *AuthClient) Login(ctx *fiber.Ctx) error {
+func (c *authClient) Login(ctx *fiber.Ctx) error {
 
 	endpoint := fmt.Sprintf("%s/login", c.baseUrl)
 
@@ -44,7 +50,7 @@ func (c *AuthClient) Login(ctx *fiber.Ctx) error {
 	return ctx.Status(statusCode).Send(body)
 }
 
-func (c *AuthClient) Register(ctx *fiber.Ctx) error {
+func (c *authClient) Register(ctx *fiber.Ctx) error {
 	endpoint := fmt.Sprintf("%s/register", c.baseUrl)
 	a := fiber.Post(endpoint)
 	a.Debug()
@@ -64,7 +70,7 @@ func (c *AuthClient) Register(ctx *fiber.Ctx) error {
 	return ctx.Status(statusCode).Send(body)
 }
 
-func (c *AuthClient) Roles(ctx *fiber.Ctx) ([]string, error) {
+func (c *authClient) Roles(ctx *fiber.Ctx) ([]string, error) {
 	endpoint := fmt.Sprintf("%s/roles", c.baseUrl)
 	a := fiber.Get(endpoint)
 
