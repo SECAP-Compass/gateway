@@ -15,13 +15,13 @@ type FiberServer struct {
 
 func New() *FiberServer {
 
-	authClient := clients.NewAuthClient()
 	initOtlp()
 
 	server := &FiberServer{
 		App: fiber.New(),
 
-		authClient: authClient,
+		authClient:  clients.NewAuthClient(),
+		inputClient: clients.NewInputClient(),
 	}
 
 	return server

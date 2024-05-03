@@ -75,25 +75,17 @@ func (c *authClient) Roles(ctx *fiber.Ctx) ([]string, error) {
 	a := fiber.Get(endpoint)
 
 	a.Body(ctx.Body())
+	a.Set("Authorization", ctx.Get("Authorization"))
 	a.Set("Content-Type", "application/json")
 
-	statusCode, body, errs := a.Bytes()
+	_, body, errs := a.Bytes()
 	if len(errs) > 0 {
-		return nil, ctx.Status(statusCode).JSON(
-			fiber.Map{
-				"errors": errs,
-			},
-		)
+		return nil, errs[0]
 	}
 
 	roles := make([]string, 0)
-	if err := jsoniter.Unmarshal(body, roles); err != nil {
-		return nil, ctx.Status(fiber.StatusInternalServerError).JSON(
-			fiber.Map{
-				"message": "Internal Server Error",
-				"errors":  err,
-			},
-		)
+	if err := jsoniter.Unmarshal(body, &roles); err != nil {
+		return nil, err
 	}
 
 	return roles, nil

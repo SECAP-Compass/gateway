@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"os"
 )
@@ -26,11 +27,44 @@ func NewInputClient() InputClient {
 }
 
 func (i *inputClient) CreateBuilding(c *fiber.Ctx) error {
-	//TODO implement me
-	panic("implement me")
+	endpoint := fmt.Sprintf("%s/building", i.baseUrl)
+
+	a := fiber.Post(endpoint)
+	a.Debug()
+
+	a.Body(c.Body())
+	a.Set("Content-Type", "application/json")
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	return c.Status(statusCode).Send(body)
 }
 
 func (i *inputClient) MeasureBuilding(c *fiber.Ctx) error {
-	//TODO implement me
-	panic("implement me")
+
+	endpoint := fmt.Sprintf("%s/building/measure", i.baseUrl)
+
+	a := fiber.Post(endpoint)
+	a.Debug()
+
+	a.Body(c.Body())
+	a.Set("Content-Type", "application/json")
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	return c.Status(statusCode).Send(body)
 }

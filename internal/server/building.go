@@ -5,7 +5,7 @@ import (
 	"slices"
 )
 
-func RegisterBuildingRoutes(s *FiberServer) {
+func (s *FiberServer) RegisterBuildingRoutes() {
 	s.App.Post("/building", s.buildingAdminMiddleware, s.CreateBuildingHandler)
 	s.App.Get("/building/measure", s.buildingAdminMiddleware, s.MeasureBuildingHandler)
 }
@@ -35,9 +35,9 @@ func (s *FiberServer) buildingAdminMiddleware(c *fiber.Ctx) error {
 }
 
 func (s *FiberServer) CreateBuildingHandler(c *fiber.Ctx) error {
-
+	return s.inputClient.CreateBuilding(c)
 }
 
 func (s *FiberServer) MeasureBuildingHandler(c *fiber.Ctx) error {
-
+	return s.inputClient.MeasureBuilding(c)
 }
