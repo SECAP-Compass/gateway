@@ -3,7 +3,10 @@ package server
 import (
 	"github.com/gofiber/fiber/v2"
 	"slices"
+	"strings"
 )
+
+const buildingAdminRole = "buildingAdmin"
 
 func (s *FiberServer) RegisterBuildingRoutes() {
 	s.App.Post("/building", s.buildingAdminMiddleware, s.CreateBuildingHandler)
@@ -11,26 +14,28 @@ func (s *FiberServer) RegisterBuildingRoutes() {
 }
 
 func (s *FiberServer) buildingAdminMiddleware(c *fiber.Ctx) error {
-	accessToken := c.Get("Authorization")
-	if accessToken == "" {
+	bearerToken := c.Get("Authorization")
+	if bearerToken == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Unauthorized",
 		})
 	}
 
-	roles, err := s.authClient.Roles(c)
+	token := strings.Split(bearerToken, "Bearer ")[1]
+	claims, err := s.jwtHandler.FetchClaims(token)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err,
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": err.Error(),
 		})
 	}
 
-	if !slices.Contains(roles, "buildingAdmin") {
+	if !slices.Contains(claims.Roles, buildingAdminRole) {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"error": "Forbidden",
 		})
 	}
 
+	c.Locals("X-Authority", claims.Authority)
 	return c.Next()
 }
 

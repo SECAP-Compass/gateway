@@ -2,7 +2,6 @@ package clients
 
 import (
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,7 +10,6 @@ import (
 type AuthClient interface {
 	Login(ctx *fiber.Ctx) error
 	Register(ctx *fiber.Ctx) error
-	Roles(ctx *fiber.Ctx) ([]string, error)
 }
 
 type authClient struct {
@@ -68,25 +66,4 @@ func (c *authClient) Register(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(statusCode).Send(body)
-}
-
-func (c *authClient) Roles(ctx *fiber.Ctx) ([]string, error) {
-	endpoint := fmt.Sprintf("%s/roles", c.baseUrl)
-	a := fiber.Get(endpoint)
-
-	a.Body(ctx.Body())
-	a.Set("Authorization", ctx.Get("Authorization"))
-	a.Set("Content-Type", "application/json")
-
-	_, body, errs := a.Bytes()
-	if len(errs) > 0 {
-		return nil, errs[0]
-	}
-
-	roles := make([]string, 0)
-	if err := jsoniter.Unmarshal(body, &roles); err != nil {
-		return nil, err
-	}
-
-	return roles, nil
 }

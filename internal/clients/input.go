@@ -34,6 +34,7 @@ func (i *inputClient) CreateBuilding(c *fiber.Ctx) error {
 
 	a.Body(c.Body())
 	a.Set("Content-Type", "application/json")
+	a.Set("X-Authority", c.Locals("X-Authority").(string))
 
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {
@@ -56,6 +57,7 @@ func (i *inputClient) MeasureBuilding(c *fiber.Ctx) error {
 
 	a.Body(c.Body())
 	a.Set("Content-Type", "application/json")
+	a.Set("X-Authority", c.Get("X-Authority"))
 
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {
