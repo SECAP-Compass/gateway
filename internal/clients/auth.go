@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -61,4 +62,33 @@ func (c *AuthClient) Register(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(statusCode).Send(body)
+}
+
+func (c *AuthClient) Roles(ctx *fiber.Ctx) ([]string, error) {
+	endpoint := fmt.Sprintf("%s/roles", c.baseUrl)
+	a := fiber.Get(endpoint)
+
+	a.Body(ctx.Body())
+	a.Set("Content-Type", "application/json")
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return nil, ctx.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	roles := make([]string, 0)
+	if err := jsoniter.Unmarshal(body, roles); err != nil {
+		return nil, ctx.Status(fiber.StatusInternalServerError).JSON(
+			fiber.Map{
+				"message": "Internal Server Error",
+				"errors":  err,
+			},
+		)
+	}
+
+	return roles, nil
 }
