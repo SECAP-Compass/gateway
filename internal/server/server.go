@@ -10,8 +10,9 @@ import (
 type FiberServer struct {
 	*fiber.App
 
-	authClient  clients.AuthClient
-	inputClient clients.InputClient
+	authClient      clients.AuthClient
+	inputClient     clients.InputClient
+	inventoryClient clients.InventoryClient
 
 	jwtHandler jwt.Handler
 }
@@ -23,9 +24,11 @@ func New() *FiberServer {
 	server := &FiberServer{
 		App: fiber.New(),
 
-		authClient:  clients.NewAuthClient(),
-		inputClient: clients.NewInputClient(),
-		jwtHandler:  jwt.NewJwtHandler(),
+		authClient:      clients.NewAuthClient(),
+		inputClient:     clients.NewInputClient(),
+		inventoryClient: clients.NewInventoryClient(),
+
+		jwtHandler: jwt.NewJwtHandler(),
 	}
 
 	return server
