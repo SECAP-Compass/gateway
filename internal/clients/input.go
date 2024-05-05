@@ -9,6 +9,8 @@ import (
 type InputClient interface {
 	CreateBuilding(c *fiber.Ctx) error
 	MeasureBuilding(c *fiber.Ctx) error
+	GetMeasurementTypeHeaders(c *fiber.Ctx) error
+	GetMeasurementTypes(c *fiber.Ctx) error
 }
 
 type inputClient struct {
@@ -53,7 +55,6 @@ func (i *inputClient) MeasureBuilding(c *fiber.Ctx) error {
 	endpoint := fmt.Sprintf("%s/building/measure", i.baseUrl)
 
 	a := fiber.Post(endpoint)
-	a.Debug()
 
 	a.Body(c.Body())
 	a.Set("Content-Type", "application/json")
@@ -68,5 +69,41 @@ func (i *inputClient) MeasureBuilding(c *fiber.Ctx) error {
 		)
 	}
 
+	return c.Status(statusCode).Send(body)
+}
+
+func (i *inputClient) GetMeasurementTypeHeaders(c *fiber.Ctx) error {
+	endpoint := fmt.Sprintf("%s/building/measurement-types", i.baseUrl)
+
+	a := fiber.Get(endpoint)
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	c.Set("Content-Type", "application/json")
+	return c.Status(statusCode).Send(body)
+}
+
+func (i *inputClient) GetMeasurementTypes(c *fiber.Ctx) error {
+	endpoint := fmt.Sprintf("%s/building/measurement-types/%s", i.baseUrl, c.Params("header"))
+
+	a := fiber.Get(endpoint)
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	c.Set("Content-Type", "application/json")
 	return c.Status(statusCode).Send(body)
 }

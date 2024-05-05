@@ -5,6 +5,9 @@ import "github.com/gofiber/fiber/v2"
 type InventoryClient interface {
 	GetCities(c *fiber.Ctx) error
 	GetCityById(c *fiber.Ctx) error
+	GetBuildings(c *fiber.Ctx) error
+	GetBuildingById(c *fiber.Ctx) error
+	GetBuildingMeasurementsById(c *fiber.Ctx) error
 }
 
 type inventoryClient struct {
@@ -39,7 +42,60 @@ func (i *inventoryClient) GetCityById(c *fiber.Ctx) error {
 	const endpoint = "/cities/"
 
 	a := fiber.Get(i.baseUrl + endpoint + c.Params("id"))
-	a.Debug()
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	c.Set("Content-Type", "application/json")
+	return c.Status(statusCode).Send(body)
+}
+
+func (i *inventoryClient) GetBuildings(c *fiber.Ctx) error {
+	const endpoint = "/buildings"
+
+	a := fiber.Get(i.baseUrl + endpoint)
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	c.Set("Content-Type", "application/json")
+	return c.Status(statusCode).Send(body)
+}
+
+func (i *inventoryClient) GetBuildingById(c *fiber.Ctx) error {
+	const endpoint = "/buildings/"
+
+	a := fiber.Get(i.baseUrl + endpoint + c.Params("id"))
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	c.Set("Content-Type", "application/json")
+	return c.Status(statusCode).Send(body)
+}
+
+func (i *inventoryClient) GetBuildingMeasurementsById(c *fiber.Ctx) error {
+	const endpoint = "/buildings/"
+
+	a := fiber.Get(i.baseUrl + endpoint + c.Params("id") + "/measurements")
 
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {
