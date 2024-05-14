@@ -13,12 +13,13 @@ func (s *FiberServer) RegisterBuildingRoutes() {
 
 	// middleware?
 	s.App.Get("/buildings", s.GetBuildingsHandler)
+	s.App.Get("/buildings/filter", s.GetBuildingFilter)
+	s.App.Get("/buildings/measurement-types", s.GetMeasurementTypeHeaders)
+	s.App.Get("/buildings/measurement-types/:header", s.GetMeasurementTypes)
 	s.App.Get("/buildings/:id", s.GetBuildingByIdHandler)
 	s.App.Post("/buildings/:id/measurements", s.buildingAdminMiddleware, s.MeasureBuildingHandler)
 	s.App.Get("/buildings/:id/measurements", s.buildingAdminMiddleware, s.GetBuildingMeasurementsById)
 
-	s.App.Get("/buildings/measurement-types", s.GetMeasurementTypeHeaders)
-	s.App.Get("/buildings/measurement-types/:header", s.GetMeasurementTypes)
 }
 
 // There should expire control
@@ -45,6 +46,7 @@ func (s *FiberServer) buildingAdminMiddleware(c *fiber.Ctx) error {
 	}
 
 	c.Locals("X-Authority", claims.Authority)
+	c.Locals("X-Agent", claims.StandardClaims.Subject)
 	return c.Next()
 }
 
@@ -54,6 +56,10 @@ func (s *FiberServer) CreateBuildingHandler(c *fiber.Ctx) error {
 
 func (s *FiberServer) MeasureBuildingHandler(c *fiber.Ctx) error {
 	return s.inputClient.MeasureBuilding(c)
+}
+
+func (s *FiberServer) GetBuildingFilter(c *fiber.Ctx) error {
+	return s.inventoryClient.GetBuildingFilter(c)
 }
 
 func (s *FiberServer) GetBuildingMeasurementsById(c *fiber.Ctx) error {

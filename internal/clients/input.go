@@ -37,6 +37,7 @@ func (i *inputClient) CreateBuilding(c *fiber.Ctx) error {
 	a.Body(c.Body())
 	a.Set("Content-Type", "application/json")
 	a.Set("X-Authority", c.Locals("X-Authority").(string))
+	a.Set("X-Agent", c.Locals("X-Agent").(string))
 
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {
