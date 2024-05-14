@@ -8,7 +8,7 @@ import (
 
 type InputClient interface {
 	CreateBuilding(c *fiber.Ctx) error
-	MeasureBuilding(c *fiber.Ctx) error
+	MeasureBuilding(c *fiber.Ctx, buildingId string) error
 	GetMeasurementTypeHeaders(c *fiber.Ctx) error
 	GetMeasurementTypes(c *fiber.Ctx) error
 }
@@ -51,15 +51,16 @@ func (i *inputClient) CreateBuilding(c *fiber.Ctx) error {
 	return c.Status(statusCode).Send(body)
 }
 
-func (i *inputClient) MeasureBuilding(c *fiber.Ctx) error {
+func (i *inputClient) MeasureBuilding(c *fiber.Ctx, buildingId string) error {
 
-	endpoint := fmt.Sprintf("%s/building/measure", i.baseUrl)
+	endpoint := fmt.Sprintf("%s/building/%s/measure", i.baseUrl, buildingId)
 
 	a := fiber.Post(endpoint)
 
 	a.Body(c.Body())
 	a.Set("Content-Type", "application/json")
-	a.Set("X-Authority", c.Get("X-Authority"))
+	a.Set("X-Authority", c.Locals("X-Authority").(string))
+	a.Set("X-Agent", c.Locals("X-Agent").(string))
 
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {

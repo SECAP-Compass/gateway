@@ -16,10 +16,15 @@ func (s *FiberServer) RegisterBuildingRoutes() {
 	s.App.Get("/buildings/filter", s.GetBuildingFilter)
 	s.App.Get("/buildings/measurement-types", s.GetMeasurementTypeHeaders)
 	s.App.Get("/buildings/measurement-types/:header", s.GetMeasurementTypes)
+	s.App.Get("/buildings/measurement-units", s.GetMeasurementUnits)
 	s.App.Get("/buildings/:id", s.GetBuildingByIdHandler)
 	s.App.Post("/buildings/:id/measurements", s.buildingAdminMiddleware, s.MeasureBuildingHandler)
 	s.App.Get("/buildings/:id/measurements", s.buildingAdminMiddleware, s.GetBuildingMeasurementsById)
 
+}
+
+var measurementUnits = []string{
+	"GJ", "MJ", "MWh", "KWh", "therm", "mmBtu", "Btu",
 }
 
 // There should expire control
@@ -55,7 +60,7 @@ func (s *FiberServer) CreateBuildingHandler(c *fiber.Ctx) error {
 }
 
 func (s *FiberServer) MeasureBuildingHandler(c *fiber.Ctx) error {
-	return s.inputClient.MeasureBuilding(c)
+	return s.inputClient.MeasureBuilding(c, c.Params("id"))
 }
 
 func (s *FiberServer) GetBuildingFilter(c *fiber.Ctx) error {
@@ -81,4 +86,10 @@ func (s *FiberServer) GetBuildingsHandler(c *fiber.Ctx) error {
 func (s *FiberServer) GetBuildingByIdHandler(c *fiber.Ctx) error {
 	return s.inventoryClient.GetBuildingById(c)
 
+}
+
+func (s *FiberServer) GetMeasurementUnits(ctx *fiber.Ctx) error {
+	return ctx.JSON(fiber.Map{
+		"measurementUnits": measurementUnits,
+	})
 }
