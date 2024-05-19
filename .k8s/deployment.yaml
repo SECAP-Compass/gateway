@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secap-gw
+  namespace: secap-compass
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secap-gw
+  template:
+    metadata:
+      labels:
+        app: secap-gw
+    spec:
+      containers:
+        - name: secap-gw
+          image: secap-gw:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5173
+              name: http
+              protocol: TCP
+          env:
+            - name: AUTH_BASEURL
+              value: http://secap-auth:8000
+            - name: INPUT_BASEURL
+              value: http://secap-input:8001
+            - name: INVENTORY_BASEURL
+              value: http://secap-inventory:8002
+            - name: OTLP_ENDPOINT
+              value: http://localhost:4318
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "200Mi"
+            requests:
+              cpu: "50m"
+              memory: "50Mi"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: secap-gw
+  namespace: secap-compass
+spec:
+  selector:
+    app: secap-gw
+  ports:
+    - protocol: TCP
+      port: 5173
+      targetPort: 5173
+  type: LoadBalancer
+

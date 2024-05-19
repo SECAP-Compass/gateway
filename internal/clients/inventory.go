@@ -2,6 +2,8 @@ package clients
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"log/slog"
+	"os"
 )
 
 type InventoryClient interface {
@@ -18,8 +20,15 @@ type inventoryClient struct {
 }
 
 func NewInventoryClient() InventoryClient {
+	baseUrl := os.Getenv("INVENTORY_BASEURL")
+	if baseUrl == "" {
+		panic("INVENTORY_BASEURL is not set")
+	}
+
+	slog.Info("INVENTORY BASE : ", baseUrl)
+
 	return &inventoryClient{
-		baseUrl: "http://localhost:8003",
+		baseUrl: baseUrl,
 	}
 }
 
@@ -27,6 +36,7 @@ func (i *inventoryClient) GetCities(c *fiber.Ctx) error {
 	const endpoint = "/cities"
 
 	a := fiber.Get(i.baseUrl + endpoint)
+	a.Debug()
 
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {
@@ -45,7 +55,7 @@ func (i *inventoryClient) GetCityById(c *fiber.Ctx) error {
 	const endpoint = "/cities/"
 
 	a := fiber.Get(i.baseUrl + endpoint + c.Params("id"))
-
+	a.Debug()
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {
 		return c.Status(statusCode).JSON(

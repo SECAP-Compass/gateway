@@ -21,7 +21,12 @@ func main() {
 	server.RegisterBuildingRoutes()
 	server.RegisterInventoryRoutes()
 
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	p := os.Getenv("PORT")
+	if p == "" {
+		p = "5173"
+	}
+
+	port, _ := strconv.Atoi(p)
 	err := server.Listen(fmt.Sprintf(":%d", port))
 	if err != nil {
 		panic(fmt.Sprintf("cannot start server: %s", err))
