@@ -22,7 +22,9 @@ func New() *FiberServer {
 	initOtlp()
 
 	server := &FiberServer{
-		App: fiber.New(),
+		App: fiber.New(fiber.Config{
+			DisableKeepalive: true,
+		}),
 
 		authClient:      clients.NewAuthClient(),
 		inputClient:     clients.NewInputClient(),

@@ -2,8 +2,9 @@ package clients
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"os"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type InputClient interface {
@@ -11,6 +12,8 @@ type InputClient interface {
 	MeasureBuilding(c *fiber.Ctx, buildingId string) error
 	GetMeasurementTypeHeaders(c *fiber.Ctx) error
 	GetMeasurementTypes(c *fiber.Ctx) error
+
+	CreateGoal(c *fiber.Ctx) error
 }
 
 type inputClient struct {
@@ -96,6 +99,28 @@ func (i *inputClient) GetMeasurementTypes(c *fiber.Ctx) error {
 	endpoint := fmt.Sprintf("%s/building/measurement-types/%s", i.baseUrl, c.Params("header"))
 
 	a := fiber.Get(endpoint)
+
+	statusCode, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return c.Status(statusCode).JSON(
+			fiber.Map{
+				"errors": errs,
+			},
+		)
+	}
+
+	c.Set("Content-Type", "application/json")
+	return c.Status(statusCode).Send(body)
+}
+
+func (i *inputClient) CreateGoal(c *fiber.Ctx) error {
+	endpoint := fmt.Sprintf("%s/goals", i.baseUrl)
+
+	a := fiber.Post(endpoint)
+	a.Body(c.Body())
+	a.Set("Content-Type", "application/json")
+	a.Set("X-Authority", c.Locals("X-Authority").(string))
+	a.Set("X-Agent", c.Locals("X-Agent").(string))
 
 	statusCode, body, errs := a.Bytes()
 	if len(errs) > 0 {

@@ -1,15 +1,16 @@
 package server
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"slices"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 const buildingAdminRole = "buildingAdmin"
 
 func (s *FiberServer) RegisterBuildingRoutes() {
-	s.App.Post("/buildings", s.buildingAdminMiddleware, s.CreateBuildingHandler)
+	s.App.Post("/buildings", s.AdminMiddleware, s.CreateBuildingHandler)
 
 	// middleware?
 	s.App.Get("/buildings", s.GetBuildingsHandler)
@@ -18,8 +19,8 @@ func (s *FiberServer) RegisterBuildingRoutes() {
 	s.App.Get("/buildings/measurement-types/:header", s.GetMeasurementTypes)
 	s.App.Get("/buildings/measurement-units", s.GetMeasurementUnits)
 	s.App.Get("/buildings/:id", s.GetBuildingByIdHandler)
-	s.App.Post("/buildings/:id/measurements", s.buildingAdminMiddleware, s.MeasureBuildingHandler)
-	s.App.Get("/buildings/:id/measurements", s.buildingAdminMiddleware, s.GetBuildingMeasurementsById)
+	s.App.Post("/buildings/:id/measurements", s.AdminMiddleware, s.MeasureBuildingHandler)
+	s.App.Get("/buildings/:id/measurements", s.AdminMiddleware, s.GetBuildingMeasurementsById)
 
 }
 
@@ -28,7 +29,7 @@ var measurementUnits = []string{
 }
 
 // There should expire control
-func (s *FiberServer) buildingAdminMiddleware(c *fiber.Ctx) error {
+func (s *FiberServer) AdminMiddleware(c *fiber.Ctx) error {
 	bearerToken := c.Get("Authorization")
 	if bearerToken == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

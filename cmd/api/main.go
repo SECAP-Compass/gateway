@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"os"
 	"secap-gw/internal/server"
 	"strconv"
@@ -20,7 +21,9 @@ func main() {
 	server.RegisterFiberRoutes()
 	server.RegisterBuildingRoutes()
 	server.RegisterInventoryRoutes()
+	server.RegisterGoalRoutes()
 
+	server.App.Use("/metrics", monitor.New())
 	p := os.Getenv("PORT")
 	if p == "" {
 		p = "5173"
